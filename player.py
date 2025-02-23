@@ -2,12 +2,13 @@ from __future__ import annotations
 from displaylib import * # type: ignore
 import keyboard
 from typing import TYPE_CHECKING
-# ===
+# local imports
 from remote_type import RemoteType
 from actor import Actor
 from voxel import Voxel
 from c4 import C4
 from mortar import Mortar
+from firearm import Firearm
 
 if TYPE_CHECKING:
     from main import App
@@ -25,12 +26,17 @@ class Player(Actor):
         self.tab_pressed = False
         self.build_pressed = False
         self.is_walking = False
+        self.direction = Vec2i(0, 0)
         self.animation_player = AnimationPlayer(
             self,
             Idle=Animation("./animations/idle"),
             WalkRight=Animation("./animations/walk"),
             WalkLeft=Animation("./animations/walk", fliph=True),
+            Hold=Animation("./animations/hold"),
+            WalkHoldRight=Animation("./animations/walk_hold"),
+            WalkHoldLeft=Animation("./animations/walk_hold", fliph=True, fill=True)
         )
+        # self.firearm = Firearm(self, x=-1)
     
     def size(self) -> Vec2i:
         size = super().size()
@@ -57,32 +63,43 @@ class Player(Actor):
             if self.get_collider():
                 self.position.y -= 1
             
-            velocity = Vec2()
-            if keyboard.is_pressed("d"):
+            velocity = Vec2i()
+            if keyboard.is_pressed("D"):
                 velocity.x += 1
-            if keyboard.is_pressed("a"):
+            if keyboard.is_pressed("A"):
                 velocity.x -= 1
-            if keyboard.is_pressed("w"):
+            if keyboard.is_pressed("W"):
                 velocity.y -= 1
-            if keyboard.is_pressed("s"):
+            if keyboard.is_pressed("S"):
                 velocity.y += 1
             self.position += velocity
             if self.get_collider():
-                if not keyboard.is_pressed("space"):
+                if not keyboard.is_pressed("SPACE"):
                     self.position -= velocity
                     velocity -= velocity
+            else:
+                self.direction = velocity.copy()
             
             direction = velocity.sign().x
             if direction == 0:
-                self.animation_player.play("Idle")
+                anim_name = "Idle" if not hasattr(self, "firearm") else "Hold"
+                self.animation_player.play(anim_name)
                 self.is_walking = False
             elif direction == 1:
-                if self.animation_player.current_animation != "WalkRight" or not self.animation_player.is_playing:
-                    self.animation_player.play("WalkRight")
+                anim_name = "WalkRight" if not hasattr(self, "firearm") else "WalkHoldRight"
+                if hasattr(self, "firearm"):
+                    self.firearm.position.x = -1 # type: ignore
+                    self.firearm.texture = self.firearm.original_texture # type: ignore
+                if self.animation_player.current_animation != anim_name or not self.animation_player.is_playing:
+                    self.animation_player.play(anim_name)
                     self.is_walking = True
             elif direction == -1:
-                if self.animation_player.current_animation != "WalkLeft" or not self.animation_player.is_playing:
-                    self.animation_player.play("WalkLeft")
+                anim_name = "WalkLeft" if not hasattr(self, "firearm") else "WalkHoldLeft"
+                if hasattr(self, "firearm"):
+                    self.firearm.position.x = -4 # type: ignore
+                    self.firearm.texture = text.mapfliph(self.firearm.original_texture) # type: ignore
+                if self.animation_player.current_animation != anim_name or not self.animation_player.is_playing:
+                    self.animation_player.play(anim_name)
                     self.is_walking = True
             if not self.animation_player.is_playing:
                 self.is_walking = False

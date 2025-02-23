@@ -3,14 +3,14 @@ from displaylib import * # type: ignore
 from displaylib.ascii.prototypes.texture_collider import TextCollider
 import keyboard
 import random
-import os
-os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
 from typing import TYPE_CHECKING
 import pygame.mixer as mixer
-mixer.init(channels=16)
 # local imports
 from explosive import Explosive
 from c4 import ExplosionParticle
+from voxel import Voxel
+from tree import Tree
+from building import Building
 
 if TYPE_CHECKING:
     from main import App
@@ -185,6 +185,11 @@ class Shell(Sprite, TextCollider, Explosive):
     transformation = Vec2(1, 0.5)
     default_z_index = -1
     color = color.SLATE_BLUE
+    destructable_types = (
+        Voxel,
+        Tree,
+        Building
+    )
     texture = [
         [*"[!!]"],
         [*"[!!]"]

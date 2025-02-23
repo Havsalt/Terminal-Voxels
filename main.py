@@ -4,6 +4,11 @@ import itertools
 import random
 from typing import Any
 import keyboard
+# audio imports
+import os
+os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
+import pygame.mixer as mixer
+mixer.init(channels=16)
 # local imports
 from actor import Actor
 from player import Player, StaticPlayer

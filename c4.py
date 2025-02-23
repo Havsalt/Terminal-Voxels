@@ -4,6 +4,9 @@ from displaylib.ascii.prototypes.particles_emitter import Particle
 import random
 # local imports
 from explosive import Explosive
+from voxel import Voxel
+from tree import Tree
+from building import Building
 
 
 # class ExplosionMaterial(ParticlesMaterial):
@@ -43,6 +46,11 @@ class C4(Sprite, TextCollider, Explosive):
     explosion_radius = 8
     frames_elapsed = 0.0
     transformation: Vec2 = Vec2(0.5, 1)
+    destructable_types = (
+        Voxel,
+        Tree,
+        Building
+    )
     
     def get_collider(self) -> TextCollider | None:
         here = self.get_global_position()
